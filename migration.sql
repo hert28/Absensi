@@ -4,11 +4,11 @@
 -- batas_terlambat dihitung di Python (database.py)
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS absensi_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+-- CREATE DATABASE IF NOT EXISTS absensi_db
+--     CHARACTER SET utf8mb4
+--     COLLATE utf8mb4_unicode_ci;
 
-USE absensi_db;
+-- USE absensi_db;
 
 -- 1. admin
 CREATE TABLE IF NOT EXISTS admin (
