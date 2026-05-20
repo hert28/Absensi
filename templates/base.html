@@ -118,6 +118,16 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* Efek bayangan premium & kontras border untuk memperjelas batasan div/card */
+        div[class*="bg-surface-container"], 
+        section[class*="bg-surface-container"],
+        aside,
+        header {
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 
+                        0 2px 8px -1px rgba(15, 23, 42, 0.04) !important;
+            border-color: rgba(203, 213, 225, 0.8) !important;
+        }
+
         /* Animasi notifikasi flash */
         .flash-message {
             animation: flashSlideIn 0.4s ease-out, flashFadeOut 0.4s ease-in 3.6s forwards;
