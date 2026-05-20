@@ -816,3 +816,53 @@ def get_statistik_dashboard():
             'total_mahasiswa': 0, 'total_kelas': 0,
             'hadir_hari_ini': 0, 'terlambat_hari_ini': 0, 'alpha_hari_ini': 0,
         }
+
+
+# ══════════════════════════════════════════════════════════════
+# PENCARIAN MAHASISWA DAN JADWAL
+# ══════════════════════════════════════════════════════════════
+
+def cari_mahasiswa(query_str):
+    """Cari mahasiswa berdasarkan nama atau NIM. Return list dict atau []."""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = """
+            SELECT u.*, k.nama_kelas
+            FROM users u
+            JOIN kelas k ON u.kelas_id = k.id
+            WHERE u.nama LIKE %s OR u.nim LIKE %s
+            ORDER BY u.nama
+            LIMIT 10
+        """
+        like_query = f"%{query_str}%"
+        cursor.execute(sql, (like_query, like_query))
+        hasil = cursor.fetchall()
+        cursor.close(); conn.close()
+        return hasil
+    except Exception:
+        return []
+
+
+def cari_jadwal(query_str):
+    """Cari jadwal berdasarkan nama MK, kode MK, hari, atau nama kelas. Return list dict atau []."""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = """
+            SELECT j.*, m.nama_mk, m.kode_mk, k.nama_kelas
+            FROM jadwal j
+            JOIN matakuliah m ON j.matakuliah_id = m.id
+            JOIN kelas k ON m.kelas_id = k.id
+            WHERE m.nama_mk LIKE %s OR m.kode_mk LIKE %s OR j.hari LIKE %s OR k.nama_kelas LIKE %s
+            ORDER BY FIELD(j.hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'),
+                     j.jam_mulai
+            LIMIT 10
+        """
+        like_query = f"%{query_str}%"
+        cursor.execute(sql, (like_query, like_query, like_query, like_query))
+        hasil = cursor.fetchall()
+        cursor.close(); conn.close()
+        return hasil
+    except Exception:
+        return []

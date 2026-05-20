@@ -781,6 +781,54 @@ def api_training_start():
     })
 
 
+@app.route('/api/search')
+@login_required
+def api_search():
+    """Endpoint API untuk mencari data mahasiswa dan jadwal secara realtime."""
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({
+            'status': 'ok',
+            'data': {'mahasiswa': [], 'jadwal': []},
+            'pesan': 'Query pencarian kosong.'
+        })
+
+    try:
+        mahasiswa = db.cari_mahasiswa(query)
+        jadwal = db.cari_jadwal(query)
+
+        # Konversi tipe data non-JSON-serializable (seperti timedelta) ke string
+        for row in jadwal:
+            for key in ['jam_mulai', 'jam_selesai', 'batas_terlambat']:
+                if key in row:
+                    val = row[key]
+                    if isinstance(val, timedelta):
+                        total_seconds = int(val.total_seconds())
+                        hours, remainder = divmod(total_seconds, 3600)
+                        minutes, seconds = divmod(remainder, 60)
+                        row[key] = f'{hours:02d}:{minutes:02d}'
+                    elif hasattr(val, 'strftime'):
+                        row[key] = val.strftime('%H:%M')
+                    else:
+                        row[key] = str(val)[:5]
+
+        return jsonify({
+            'status': 'ok',
+            'data': {
+                'mahasiswa': mahasiswa,
+                'jadwal': jadwal
+            },
+            'pesan': 'Pencarian berhasil.'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'data': {'mahasiswa': [], 'jadwal': []},
+            'pesan': f'Terjadi kesalahan saat mencari: {str(e)}'
+        })
+
+
+
 
 # ══════════════════════════════════════════════════════════════
 # FACE RECOGNITION + ABSENSI OTOMATIS
