@@ -8,6 +8,14 @@ from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime, date, timedelta
+from zoneinfo import ZoneInfo
+
+# Timezone WIB (UTC+8) — digunakan di semua fungsi waktu
+WIB = ZoneInfo('Asia/Jakarta')
+
+def now_wib():
+    """Dapatkan waktu sekarang dalam timezone WIB."""
+    return datetime.now(WIB)
 import os
 import base64
 import threading
@@ -933,7 +941,7 @@ def _simpan_snapshot(frame, user_id):
     """Simpan snapshot bukti absensi ke folder snapshots/."""
     try:
         os.makedirs(SNAPSHOT_PATH, exist_ok=True)
-        now = datetime.now()
+        now = now_wib()
         filename = f"{user_id}_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
         filepath = os.path.join(SNAPSHOT_PATH, filename)
         cv2.imwrite(filepath, frame)
@@ -958,12 +966,12 @@ def _kirim_ke_esp32(nama, nim, status_pesan):
 
 
 def _get_nama_hari():
-    """Dapatkan nama hari ini dalam Bahasa Indonesia."""
+    """Dapatkan nama hari ini dalam Bahasa Indonesia (timezone WIB)."""
     hari_map = {
         0: 'Senin', 1: 'Selasa', 2: 'Rabu',
         3: 'Kamis', 4: 'Jumat', 5: 'Sabtu', 6: 'Minggu'
     }
-    return hari_map.get(datetime.now().weekday(), '')
+    return hari_map.get(now_wib().weekday(), '')
 
 
 def _proses_recognition(frame):
@@ -1070,7 +1078,7 @@ def _proses_recognition(frame):
 
     # ── 4. Cari jadwal aktif hari ini ──
     hari = _get_nama_hari()
-    waktu_sekarang = datetime.now().strftime('%H:%M:%S')
+    waktu_sekarang = now_wib().strftime('%H:%M:%S')
     jadwal_list = db.get_jadwal_aktif(hari, waktu_sekarang)
 
     if not jadwal_list:
@@ -1298,8 +1306,8 @@ def _auto_alpha_checker():
         _time.sleep(60)  # Cek setiap 60 detik
         try:
             hari = _get_nama_hari()
-            waktu_sekarang = datetime.now().strftime('%H:%M:%S')
-            tanggal = date.today()
+            waktu_sekarang = now_wib().strftime('%H:%M:%S')
+            tanggal = now_wib().date()
 
             # Ambil semua jadwal yang sudah selesai hari ini
             jadwal_selesai = db.get_jadwal_selesai_hari_ini(hari, waktu_sekarang)
