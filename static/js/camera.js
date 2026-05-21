@@ -15,6 +15,7 @@ const CameraManager = {
     frameInterval: 1200,    // Kirim frame setiap 1200ms (1.2 detik) untuk mengurangi beban cloud
     lastResult: null,       // Hasil recognition terakhir
     isProcessing: false,    // Mencegah penumpukan frame (backpressure)
+    lastProcessTime: 0,     // Waktu terakhir frame dikirim (untuk timeout)
 
     /**
      * Inisialisasi kamera manager
@@ -173,8 +174,19 @@ const CameraManager = {
 
         this.intervalId = setInterval(() => {
             if (!this.isActive || !this.video.videoWidth) return;
-            if (this.isProcessing) return; // Tunggu response server sebelumnya selesai
+            
+            // Safety timeout: jika isProcessing nyangkut lebih dari 5 detik, paksa buka
+            if (this.isProcessing) {
+                if (Date.now() - this.lastProcessTime > 5000) {
+                    console.warn('[CAMERA] Timeout response dari server, force unlock isProcessing.');
+                    this.isProcessing = false;
+                } else {
+                    return; // Tunggu response
+                }
+            }
+            
             this.isProcessing = true; // Kunci frame
+            this.lastProcessTime = Date.now(); // Catat waktu mulai
             this._captureAndSend();
         }, this.frameInterval);
     },
