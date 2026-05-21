@@ -31,7 +31,3 @@ desktop.ini
 
 # Snapshots & Data
 snapshots/
-dataset/*
-!dataset/.gitkeep
-models/*
-!models/.gitkeep
