@@ -1062,7 +1062,7 @@ def _proses_recognition(frame):
         _consecutive_tracker['user_id'] = detected_uid
         _consecutive_tracker['count'] = 1
 
-    required = 2  # Minimal 2 frame konsekutif (lebih toleran untuk koneksi lambat)
+    required = 3  # Minimal 3 frame konsekutif (wajah dari berbagai sisi)
     if _consecutive_tracker['count'] < required:
         return {
             'status': 'skip',
