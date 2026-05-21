@@ -12,8 +12,9 @@ const CameraManager = {
     isActive: false,        // Status kamera aktif/tidak
     intervalId: null,       // Interval pengiriman frame
     socket: null,           // SocketIO connection
-    frameInterval: 500,     // Kirim frame setiap 500ms
+    frameInterval: 1200,    // Kirim frame setiap 1200ms (1.2 detik) untuk mengurangi beban cloud
     lastResult: null,       // Hasil recognition terakhir
+    isProcessing: false,    // Mencegah penumpukan frame (backpressure)
 
     /**
      * Inisialisasi kamera manager
@@ -95,9 +96,9 @@ const CameraManager = {
             this.video.classList.add('active');
             await this.video.play();
 
-            // Set canvas ukuran sesuai video
-            this.canvas.width = 640;
-            this.canvas.height = 480;
+            // Set canvas ukuran lebih kecil untuk meringankan payload jaringan
+            this.canvas.width = 320;
+            this.canvas.height = 240;
 
             this.isActive = true;
 
@@ -172,6 +173,8 @@ const CameraManager = {
 
         this.intervalId = setInterval(() => {
             if (!this.isActive || !this.video.videoWidth) return;
+            if (this.isProcessing) return; // Tunggu response server sebelumnya selesai
+            this.isProcessing = true; // Kunci frame
             this._captureAndSend();
         }, this.frameInterval);
     },
