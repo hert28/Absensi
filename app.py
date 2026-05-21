@@ -832,6 +832,17 @@ def api_foto_upload():
 
         folder = os.path.join(DATASET_PATH, str(user_id))
         os.makedirs(folder, exist_ok=True)
+
+        # Cek batas maksimum foto — tolak jika sudah cukup
+        from config import FOTO_PER_USER
+        foto_tersimpan = len([f for f in os.listdir(folder) if f.endswith('.jpg')])
+        if foto_tersimpan >= FOTO_PER_USER:
+            return jsonify({
+                'status': 'selesai',
+                'pesan': f'Batas {FOTO_PER_USER} foto sudah tercapai. Silakan mulai training.',
+                'data': {'user_id': user_id, 'total': foto_tersimpan}
+            })
+
         filepath = os.path.join(folder, f'{index}.jpg')
 
         if save_frame is not None:
