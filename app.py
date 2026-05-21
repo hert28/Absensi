@@ -1042,9 +1042,9 @@ def _proses_recognition(frame):
           f'conf={result["confidence"]:.1f}, dikenali={result["dikenali"]}')
 
     if not result['dikenali']:
-        # Reset counter konsekutif saat wajah tidak dikenali
-        _consecutive_tracker['user_id'] = None
-        _consecutive_tracker['count'] = 0
+        # Kurangi counter saja (toleransi 1 frame buruk), tidak reset total
+        if _consecutive_tracker['count'] > 0:
+            _consecutive_tracker['count'] -= 1
         return {
             'status': 'error',
             'tipe': 'unknown',
@@ -1061,7 +1061,7 @@ def _proses_recognition(frame):
         _consecutive_tracker['user_id'] = detected_uid
         _consecutive_tracker['count'] = 1
 
-    required = 3  # Minimal 3 frame konsekutif
+    required = 2  # Minimal 2 frame konsekutif (lebih toleran untuk koneksi lambat)
     if _consecutive_tracker['count'] < required:
         return {
             'status': 'skip',
