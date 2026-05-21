@@ -1129,7 +1129,7 @@ def _proses_recognition(frame):
         }
 
     # ── 5. Cek duplikasi absensi ──
-    tanggal_hari_ini = date.today()
+    tanggal_hari_ini = now_wib().date()
     sudah = db.cek_sudah_absen(user_id, jadwal['id'], tanggal_hari_ini)
 
     if sudah:
