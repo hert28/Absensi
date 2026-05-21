@@ -17,6 +17,7 @@ def now_wib():
     """Dapatkan waktu sekarang dalam timezone WIB."""
     return datetime.now(WIB)
 import os
+import time
 import base64
 import threading
 import numpy as np
@@ -1087,10 +1088,20 @@ def _proses_recognition(frame):
             'spoofing': spoof_result
         }
 
-    # ── 4. Cari jadwal aktif hari ini ──
+    # ── 4. Cari jadwal aktif hari ini (Menggunakan Cache 60 detik) ──
     hari = _get_nama_hari()
     waktu_sekarang = now_wib().strftime('%H:%M:%S')
-    jadwal_list = db.get_jadwal_aktif(hari, waktu_sekarang)
+    
+    global _jadwal_cache
+    now_ts = time.time()
+    if _jadwal_cache['data'] is None or (now_ts - _jadwal_cache['ts']) > 60:
+        _jadwal_cache['data'] = db.get_jadwal_aktif(hari, waktu_sekarang)
+        _jadwal_cache['hari'] = hari
+        _jadwal_cache['waktu'] = waktu_sekarang
+        _jadwal_cache['ts'] = now_ts
+        print(f"[CACHE] Refresh jadwal aktif: {_jadwal_cache['data']}")
+
+    jadwal_list = _jadwal_cache['data']
 
     if not jadwal_list:
         return {
