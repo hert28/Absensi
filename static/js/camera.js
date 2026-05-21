@@ -262,6 +262,8 @@ const CameraManager = {
             } else if (data.tipe === 'unknown') {
                 if (indicatorSpan) indicatorSpan.textContent = '? Wajah tidak dikenali';
                 this._throttledToast('warning', 'Tidak Dikenali', data.pesan || 'Wajah tidak cocok dengan database.');
+                releaseLockNow = false;
+                setTimeout(() => { this.isProcessing = false; }, 3000);
             } else if (data.tipe === 'no_jadwal') {
                 if (indicatorSpan) indicatorSpan.textContent = '⏰ Tidak ada jadwal';
                 this._throttledToast('warning', 'Tidak Ada Jadwal', data.pesan || 'Tidak ada jadwal aktif saat ini.');
