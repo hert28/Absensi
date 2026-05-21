@@ -29,5 +29,9 @@ desktop.ini
 .idea/
 *.sublime-projects
 
-# Snapshots
+# Snapshots & Data
 snapshots/
+dataset/*
+!dataset/.gitkeep
+models/*
+!models/.gitkeep
