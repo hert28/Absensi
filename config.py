@@ -21,7 +21,8 @@ if os.environ.get('DB_SSL_MODE') == 'REQUIRED':
 # === KONFIGURASI SISTEM ===
 DATASET_PATH         = os.environ.get('DATASET_PATH', 'dataset')
 MODEL_PATH           = os.environ.get('MODEL_PATH', 'models/trainer.yml')
-CONFIDENCE_THRESHOLD = int(os.environ.get('CONFIDENCE_THRESHOLD', 95))
+# Toleransi pengenalan (makin kecil makin ketat, default LBPH: <100 = dikenali)
+CONFIDENCE_THRESHOLD = int(os.environ.get('CONFIDENCE_THRESHOLD', 110))
 FOTO_PER_USER        = int(os.environ.get('FOTO_PER_USER', 50))
 CAMERA_INDEX         = int(os.environ.get('CAMERA_INDEX', 0))
 SNAPSHOT_PATH        = os.environ.get('SNAPSHOT_PATH', 'snapshots')
