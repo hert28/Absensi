@@ -221,6 +221,7 @@ const CameraManager = {
             const result = await response.json();
             this._handleRecognitionResult(result);
         } catch (err) {
+            this.isProcessing = false;
             console.warn('[CAMERA] Gagal kirim frame via HTTP:', err);
         }
     },
@@ -231,6 +232,9 @@ const CameraManager = {
     _handleRecognitionResult: function (data) {
         this.lastResult = data;
         var indicatorSpan = document.querySelector('#processing-indicator span:last-child');
+        
+        // Default: buka kunci langsung (kecuali untuk error tertentu)
+        let releaseLockNow = true;
 
         // Skip — berbagai tipe
         if (data.status === 'skip') {
@@ -241,6 +245,7 @@ const CameraManager = {
             } else {
                 if (indicatorSpan) indicatorSpan.textContent = 'Mencari wajah...';
             }
+            if (releaseLockNow) this.isProcessing = false;
             return;
         }
 
@@ -252,16 +257,21 @@ const CameraManager = {
             } else if (data.tipe === 'duplikat') {
                 if (indicatorSpan) indicatorSpan.textContent = '✓ Sudah absen';
                 this._throttledToast('info', 'Sudah Absen', data.pesan || 'Mahasiswa sudah absen hari ini.');
+                releaseLockNow = false;
+                setTimeout(() => { this.isProcessing = false; }, 3000);
             } else if (data.tipe === 'unknown') {
                 if (indicatorSpan) indicatorSpan.textContent = '? Wajah tidak dikenali';
                 this._throttledToast('warning', 'Tidak Dikenali', data.pesan || 'Wajah tidak cocok dengan database.');
             } else if (data.tipe === 'no_jadwal') {
                 if (indicatorSpan) indicatorSpan.textContent = '⏰ Tidak ada jadwal';
                 this._throttledToast('warning', 'Tidak Ada Jadwal', data.pesan || 'Tidak ada jadwal aktif saat ini.');
+                releaseLockNow = false;
+                setTimeout(() => { this.isProcessing = false; }, 3000);
             } else {
                 if (indicatorSpan) indicatorSpan.textContent = 'Memproses...';
                 console.warn('[CAMERA] Recognition error:', data.pesan);
             }
+            if (releaseLockNow) this.isProcessing = false;
             return;
         }
 
@@ -273,6 +283,9 @@ const CameraManager = {
                 `${data.data.nama} — ${data.data.status_absensi}`);
             // Refresh tabel absensi
             DashboardUI.refreshAbsensiTable();
+            // Tahan sebentar setelah berhasil absen sebelum scan lagi
+            releaseLockNow = false;
+            setTimeout(() => { this.isProcessing = false; }, 3000);
         }
 
         // Update spoofing indicator
